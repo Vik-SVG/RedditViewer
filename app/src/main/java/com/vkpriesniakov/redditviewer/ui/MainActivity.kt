@@ -1,7 +1,8 @@
-package com.vkpriesniakov.redditviewer
+package com.vkpriesniakov.redditviewer.ui
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import com.vkpriesniakov.redditviewer.R
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
