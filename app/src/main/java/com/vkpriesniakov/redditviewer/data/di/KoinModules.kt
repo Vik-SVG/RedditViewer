@@ -1,29 +1,42 @@
 package com.vkpriesniakov.redditviewer.data.di
 
+import com.vkpriesniakov.redditviewer.data.remote.RedditRemoteDataSource
 import com.vkpriesniakov.redditviewer.data.remote.RedditService
+import com.vkpriesniakov.redditviewer.data.repository.PostsRepository
+import com.vkpriesniakov.redditviewer.ui.MainViewModel
+import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 
-val retrofitModule = module {
+val mainModule = module {
 
     fun provideRetrofit(): Retrofit {
         return Retrofit.Builder()
-            .baseUrl("https://www.reddit.com")
+            .baseUrl("https://www.reddit.com/")
             .addConverterFactory(MoshiConverterFactory.create())
             .build()
-
-//            .create(RedditService::class.java)
     }
 
     fun provideRedditService(retrofit: Retrofit): RedditService {
         return retrofit.create(RedditService::class.java)
     }
 
+    single { provideRetrofit() }
+    single { provideRedditService(get()) }
+    single { RedditRemoteDataSource(provideRedditService(get())) }
+    single { PostsRepository(get()) }
+
+
+    viewModel { MainViewModel(get()) }
+
+}
+
+/*
+val viewModelModule = module {
     single {
-        provideRetrofit()
-        provideRedditService(provideRetrofit())
+        RedditRemoteDataSource(get())
+        PostsRepository(get())
     }
 
-//    single {}
-}
+}*/

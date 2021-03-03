@@ -1,12 +1,16 @@
 package com.vkpriesniakov.redditviewer.data.entities
 
-data class RedditPostsResponse(val allPosts: RedditAllPostsResponse)
+
+data class RedditPostsResponse(
+    val data: RedditAllPostsResponse)
 
 data class RedditAllPostsResponse(
-    val children: List<RedditSinglePostResponse>,
+    val children: List<RedditChildrenResponse>,
     val after: String?,
     val before: String?
 )
+
+data class RedditChildrenResponse(val data: RedditSinglePostResponse)
 
 data class RedditSinglePostResponse(
 
