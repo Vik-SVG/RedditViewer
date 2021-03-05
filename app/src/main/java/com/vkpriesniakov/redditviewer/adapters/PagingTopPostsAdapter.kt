@@ -2,13 +2,17 @@ package com.vkpriesniakov.redditviewer.adapters
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.ProgressBar
+import androidx.fragment.app.DialogFragment
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.vkpriesniakov.redditviewer.data.entities.RedditChildrenResponse
 import com.vkpriesniakov.redditviewer.databinding.ActivityMainBinding
 import com.vkpriesniakov.redditviewer.databinding.RecycleViewItemPostBinding
+import com.vkpriesniakov.redditviewer.utils.formatDate
 
 class PagingTopPostsAdapter(
     val mainBinding: ActivityMainBinding
@@ -17,22 +21,39 @@ class PagingTopPostsAdapter(
         PostsComparator
     ) {
 
-    private val inflater: LayoutInflater = LayoutInflater.from(mainBinding.root.context)
+    private val context = mainBinding.root.context
 
+    private val inflater: LayoutInflater = LayoutInflater.from(context)
 
     inner class TopPostsViewHolder(private val binding: RecycleViewItemPostBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(position: Int) {
 
-            binding.itemPostTitle.text = getItem(position)?.data?.title ?: "Title is missing"
+            val postItem = getItem(position)?.data
 
-            binding.itemPostCommentsNumber.text = getItem(position)?.data?.num_comments.toString()
+            binding.itemPostTitle.text = postItem?.title ?: "Title is missing"
+
+            binding.itemPostCommentsNumber.text = postItem?.num_comments.toString()
 
             binding.itemPostAuthor.text =
-                getItem(position)?.data?.author ?: "Redditor"    //TODO: finally set icon behaviour
+                postItem?.author ?: "Redditor"
 
-            mainBinding.progressBar2.visibility = ProgressBar.GONE
+            if (postItem != null) {
+                binding.itemPostDate.text = formatDate(postItem.created_utc)
+            }
 
+            if (postItem?.thumbnail?.startsWith("https://") == true) {
+                binding.itemPostThumbnail.visibility = ImageView.VISIBLE
+                Glide.with(context).load(postItem.thumbnail).into(binding.itemPostThumbnail)
+
+                binding.itemPostThumbnail.setOnClickListener {
+
+                }
+
+            } else
+                binding.itemPostThumbnail.visibility = ImageView.GONE
+
+            mainBinding.mainProgressBar.visibility = ProgressBar.GONE
         }
     }
 

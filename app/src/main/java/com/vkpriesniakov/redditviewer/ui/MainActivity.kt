@@ -46,7 +46,7 @@ class MainActivity : AppCompatActivity() {
 
         this.lifecycleScope.launch {
             mViewModel.allTopPostsPaging.collectLatest {
-                bdn.progressBar2.visibility = ProgressBar.VISIBLE
+                bdn.mainProgressBar.visibility = ProgressBar.VISIBLE
                 mPostsAdapter.submitData(it)
             }
         }
