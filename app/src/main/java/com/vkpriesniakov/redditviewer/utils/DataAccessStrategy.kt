@@ -6,7 +6,29 @@ import androidx.lifecycle.liveData
 import com.vkpriesniakov.redditviewer.utils.Resource.Status.*
 import kotlinx.coroutines.Dispatchers
 
-fun <T> performGetOperation(
+suspend fun <T> performGetOperation(
+    networkCall: suspend () -> Resource<T>
+): Resource<T> {
+
+    var response: Resource<T> = Resource.loading(null)
+
+    return when (response.status) {
+        SUCCESS -> {
+            response
+        }
+        ERROR -> {
+            Resource.error(response.message!!)
+        }
+        LOADING -> {
+            response = networkCall.invoke()
+            return response
+        }
+    }
+
+}
+
+
+fun <T> performGetLiveDataOperation(                        //Origin implementation with live data
     networkCall: suspend () -> Resource<T>
 ): LiveData<Resource<T>> {
 
@@ -14,8 +36,7 @@ fun <T> performGetOperation(
         emit(Resource.loading())
         val responseStatus = networkCall.invoke()
         if (responseStatus.status == SUCCESS) {
-
-            emit(responseStatus) //TODO: check if emitting right source
+            emit(responseStatus)
 
             Log.i("DataAccessStrategy", responseStatus.status.name)
             Log.i("DataAccessStrategy", responseStatus.data.toString())

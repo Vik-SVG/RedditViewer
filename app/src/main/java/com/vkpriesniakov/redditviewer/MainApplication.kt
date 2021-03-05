@@ -14,7 +14,6 @@ class MainApplication : Application() {
         startKoin {
             androidLogger()
             androidContext(this@MainApplication)
-            // use modules
             modules(
                 mainModule
             )

@@ -27,16 +27,6 @@ val mainModule = module {
     single { RedditRemoteDataSource(provideRedditService(get())) }
     single { PostsRepository(get()) }
 
-
     viewModel { MainViewModel(get()) }
-
 }
 
-/*
-val viewModelModule = module {
-    single {
-        RedditRemoteDataSource(get())
-        PostsRepository(get())
-    }
-
-}*/

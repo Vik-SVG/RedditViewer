@@ -3,9 +3,16 @@ package com.vkpriesniakov.redditviewer.ui
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.widget.ProgressBar
+import android.widget.RelativeLayout
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
+import com.vkpriesniakov.redditviewer.adapters.PagingTopPostsAdapter
 import com.vkpriesniakov.redditviewer.databinding.ActivityMainBinding
 import com.vkpriesniakov.redditviewer.utils.Resource
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : AppCompatActivity() {
@@ -14,6 +21,7 @@ class MainActivity : AppCompatActivity() {
 
     private val mViewModel: MainViewModel by viewModel()
     private lateinit var bdn: ActivityMainBinding
+    private lateinit var mPostsAdapter: PagingTopPostsAdapter
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -21,20 +29,35 @@ class MainActivity : AppCompatActivity() {
         bdn = ActivityMainBinding.inflate(layoutInflater)
         val view = bdn.root
         setContentView(view)
-        Log.i(TAG, "Starting")
 
-        mViewModel.allTopPosts.observe(this, {
-            Log.d(TAG, "Observing")
+        setObserverWithFlow(bdn)
 
+        setObserverWithLivaData(bdn.root)
+
+    }
+
+    private fun setObserverWithFlow(binding: ActivityMainBinding) {
+        mPostsAdapter = PagingTopPostsAdapter(binding)
+        bdn.mainRecyclerView.apply {
+            layoutManager = LinearLayoutManager(context)
+            setHasFixedSize(true)
+            adapter = mPostsAdapter
+        }
+
+        this.lifecycleScope.launch {
+            mViewModel.allTopPostsPaging.collectLatest {
+                bdn.progressBar2.visibility = ProgressBar.VISIBLE
+                mPostsAdapter.submitData(it)
+            }
+        }
+    }
+
+    // additional implementation with live data
+    private fun setObserverWithLivaData(view: RelativeLayout) {
+        mViewModel.allPostsStatus.observe(this, {
             when (it.status) {
                 Resource.Status.SUCCESS -> {
-                    //TODO: set progress bar visibility to none
-                    if (!it.data?.data?.children.isNullOrEmpty())
-                        Log.d(TAG, it.data?.data?.children.toString())
-//                        mViewModel.setAfter(it.data?.allPosts?.after)
-                    Log.d(TAG, "Success")
-
-                    //TODO: set rv Adapter
+//                    bdn.progressBar2.visibility = ProgressBar.GONE
                 }
                 Resource.Status.ERROR -> {
                     Snackbar.make(
@@ -45,7 +68,7 @@ class MainActivity : AppCompatActivity() {
                     Log.d(TAG, "Error")
                 }
                 Resource.Status.LOADING -> {
-                    //TODO:set progress bar visible
+//                    bdn.progressBar2.visibility = ProgressBar.VISIBLE
                     Log.d(TAG, "Loading")
                 }
             }
