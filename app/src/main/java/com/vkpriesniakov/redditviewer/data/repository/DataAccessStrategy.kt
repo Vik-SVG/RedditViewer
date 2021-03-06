@@ -1,8 +1,9 @@
-package com.vkpriesniakov.redditviewer.utils
+package com.vkpriesniakov.redditviewer.data.repository
 
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.liveData
+import com.vkpriesniakov.redditviewer.utils.Resource
 import com.vkpriesniakov.redditviewer.utils.Resource.Status.*
 import kotlinx.coroutines.Dispatchers
 

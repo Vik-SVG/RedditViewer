@@ -88,8 +88,8 @@
             android:id="@+id/item_post_thumbnail"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:layout_alignParentTop="true"
             android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
             android:scaleType="centerCrop"
             android:visibility="gone"
             app:srcCompat="@color/white" />

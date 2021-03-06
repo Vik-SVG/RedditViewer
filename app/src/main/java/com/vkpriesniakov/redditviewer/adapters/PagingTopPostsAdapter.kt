@@ -1,21 +1,25 @@
 package com.vkpriesniakov.redditviewer.adapters
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.ProgressBar
-import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.FragmentManager
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.vkpriesniakov.redditviewer.data.entities.RedditChildrenResponse
-import com.vkpriesniakov.redditviewer.databinding.ActivityMainBinding
+import com.vkpriesniakov.redditviewer.databinding.FragmentMainBinding
 import com.vkpriesniakov.redditviewer.databinding.RecycleViewItemPostBinding
+import com.vkpriesniakov.redditviewer.image_worker.ImageDialog
 import com.vkpriesniakov.redditviewer.utils.formatDate
 
 class PagingTopPostsAdapter(
-    val mainBinding: ActivityMainBinding
+    val mainBinding: FragmentMainBinding,
+    val layoutInflater: LayoutInflater,
+    val fragmentManager: FragmentManager
 ) :
     PagingDataAdapter<RedditChildrenResponse, PagingTopPostsAdapter.TopPostsViewHolder>(
         PostsComparator
@@ -43,11 +47,21 @@ class PagingTopPostsAdapter(
             }
 
             if (postItem?.thumbnail?.startsWith("https://") == true) {
+
                 binding.itemPostThumbnail.visibility = ImageView.VISIBLE
+
                 Glide.with(context).load(postItem.thumbnail).into(binding.itemPostThumbnail)
 
                 binding.itemPostThumbnail.setOnClickListener {
 
+                    Log.i("ItemURL", postItem.url)
+
+                    if (getItem(position)?.data?.url!!.endsWith(".jpg") ||
+                        getItem(position)?.data?.url!!.endsWith(".png")
+                    ) {
+                        val dialog = ImageDialog.newInstance(postItem.url)
+                        dialog.show(fragmentManager, "TAG")
+                    }
                 }
 
             } else

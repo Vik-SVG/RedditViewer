@@ -24,7 +24,7 @@ class TopPostsPagingSource(
 
             return LoadResult.Page(
                 data = allPostsData,
-                prevKey = allPostsResponse.data?.data?.before,  //reddit api always returns null
+                prevKey = null,   //allPostsResponse.data?.data?.before,  //reddit api always returns null
                 nextKey = allPostsResponse.data?.data?.after
             )
 

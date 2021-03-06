@@ -32,5 +32,13 @@ fun formatDate(createdTime: Long): String {
             )
         }
     }
+}
+
+class Utils{
+    companion object{
+
+        var nowIsSawing = false
+
+    }
 
 }
