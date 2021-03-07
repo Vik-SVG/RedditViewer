@@ -24,6 +24,8 @@ private const val IMAGE_DIRECTORY = "RedditViewer"
 
 class ImageWriter(private val context: Context) {
 
+    var contentValues:ContentValues? = null
+
     private fun createDirectory() {
         val directory = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             File(
@@ -48,40 +50,41 @@ class ImageWriter(private val context: Context) {
             return
         } else {
             Utils.nowIsSawing = true
-        }
 
+            Glide.with(context)
+                .asBitmap()
+                .load(imageUrl)
+                .into(object : CustomTarget<Bitmap>() {
+                    override fun onResourceReady(
+                        resource: Bitmap,
+                        transition: Transition<in Bitmap>?
+                    ) {
 
-        Glide.with(context as Context)
-            .asBitmap()
-            .load(imageUrl)
-            .into(object : CustomTarget<Bitmap>() {
-                override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
-
-                    GlobalScope.launch {
-                        createDirectory()
-                        writeImage(resource)
-                        Utils.nowIsSawing = false
+                        GlobalScope.launch {
+                            createDirectory()
+                            writeImage(resource)
+                            Utils.nowIsSawing = false
+                        }
                     }
-                }
 
-                override fun onLoadCleared(placeholder: Drawable?) {
+                    override fun onLoadCleared(placeholder: Drawable?) {
 
-                }
-            })
+                    }
+                })
+        }
     }
 
     private fun writeImage(resource: Bitmap) {
-        val contentValues = initiateContentValues("path")
         val contentResolver = (context).contentResolver
 
         if (Build.VERSION.SDK_INT >= 29) {
-            writeWithUri(contentResolver, contentValues, resource)
+            writeWithUri(contentResolver, resource)
         } else {
             writeWithFile(resource)
         }
     }
 
-    private fun initiateContentValues(path: String): ContentValues {
+    private fun initiateContentValues(path: String): ContentValues? {
 
         val relativeLocation =
             Environment.DIRECTORY_PICTURES + File.separator + IMAGE_DIRECTORY
@@ -91,7 +94,7 @@ class ImageWriter(private val context: Context) {
             put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
             put(MediaStore.Images.Media.DATE_ADDED, System.currentTimeMillis());
             put(MediaStore.Images.Media.DATE_TAKEN, System.currentTimeMillis());
-            put(MediaStore.MediaColumns.DISPLAY_NAME, IMAGE_DIRECTORY);
+//            put(MediaStore.MediaColumns.DISPLAY_NAME, IMAGE_DIRECTORY);
 
             if (Build.VERSION.SDK_INT >= 29) {
                 put(MediaStore.MediaColumns.RELATIVE_PATH, relativeLocation)
@@ -131,9 +134,10 @@ class ImageWriter(private val context: Context) {
 
     private fun writeWithUri(
         contentResolver: ContentResolver,
-        contentValues: ContentValues,
         resource: Bitmap
     ) {
+
+        contentValues = initiateContentValues("path")
 
         var uri: Uri? = null
         try {
@@ -153,9 +157,9 @@ class ImageWriter(private val context: Context) {
                     ) {
                         throw IOException("Failed to save bitmap.")
                     }
-                    contentValues.put(MediaStore.MediaColumns.IS_PENDING, 0)
+                    contentValues?.put(MediaStore.MediaColumns.IS_PENDING, 0)
 
-                    contentValues.clear()
+                    contentValues?.clear()
                     stream.close()
                 } ?: throw IOException("Failed to get output stream.")
             } ?: throw IOException("Failed to create new MediaStore record")
@@ -163,7 +167,7 @@ class ImageWriter(private val context: Context) {
             e.printStackTrace()
             uri?.let {
                 contentResolver.delete(it, null, null)
-                contentValues.clear()
+                contentValues?.clear()
             }
             throw IOException(e)
         }

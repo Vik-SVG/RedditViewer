@@ -1,6 +1,6 @@
 # RedditViewer
 
-Cheking reddit Top posts online with pagination and saving images
+Checking reddit Top posts online with pagination and saving images
 
 Implemented:
 - Paging Library 3 with Kotlin Flow
